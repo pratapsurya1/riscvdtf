@@ -1,0 +1,12 @@
+tools/riscv/
+tools/spike/
+tools/verilator/
+tools/riscv-gnu-toolchain/
+riscv-core/ibex/build/
+tests/inputs/*.elf
+tests/inputs/*.vmem
+tests/outputs/
+trace_core_00000000.log
+__pycache__/
+*.o
+*.d
