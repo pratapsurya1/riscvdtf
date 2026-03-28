@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html><head><title>DTF Report</title>
+<style>
+  body{font-family:monospace;margin:2em;background:#fafafa}
+  h2{color:#222}
+  .status{font-size:1.4em;font-weight:bold;color:#2a9d2a}
+  .stats{background:#fff;border:1px solid #ddd;padding:1em;margin:1em 0;display:inline-block}
+  table{border-collapse:collapse;width:100%;background:#fff}
+  th{background:#263238;color:#fff;padding:8px 12px;text-align:left}
+  td{border:1px solid #ddd;padding:6px 10px;font-size:13px}
+  tr:nth-child(even){background:#f5f5f5}
+</style></head><body>
+<h2>Differential Testing Framework — Execution Report</h2>
+<div class="stats">
+  <span class="status">PASS</span><br><br>
+  Steps compared : <b>58</b><br>
+  Ref trace len  : <b>58</b><br>
+  DUT trace len  : <b>25013</b><br>
+  Mismatches     : <b>1</b>
+</div>
+<table>
+<tr>
+  <th>Step</th><th>Severity</th><th>Type</th>
+  <th>Ref PC</th><th>DUT PC</th>
+  <th>Ref disasm</th><th>DUT disasm</th><th>Explanation</th>
+</tr>
+<tr>
+          <td>57</td>
+          <td style='color:#555555;font-weight:bold'>INFO</td>
+          <td style='color:#555555'>EXPECTED_DIVERGENCE_MMIO</td>
+          <td>0x800000dc</td>
+          <td>00100166</td>
+          <td>sw      t0, 0(t1)</td>
+          <td>sw</td>
+          <td style='font-size:11px;color:#555'>Spike trapped (MMIO invalid in reference env), DUT continued normally</td>
+        </tr>
+</table>
+</body></html>
