@@ -1,0 +1,18 @@
+{
+  "total_steps_compared": 13,
+  "ref_length": 13,
+  "dut_length": 5000,
+  "mismatches": [
+    {
+      "step": 12,
+      "severity": "INFO",
+      "type": "EXPECTED_DIVERGENCE_MMIO",
+      "explanation": "Spike trapped (MMIO invalid in reference env), DUT continued normally",
+      "ref_pc": "0x80000024",
+      "dut_pc": "00100024",
+      "ref_disasm": "sw      t0, 0(t1)",
+      "dut_disasm": "sw"
+    }
+  ],
+  "status": "PASS"
+}

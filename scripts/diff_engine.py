@@ -77,7 +77,7 @@ def parse_spike_trace(filepath: str) -> list:
 # First line is a header — skip it.
 # We also skip the boot jump at 0x100080 (_vector_start: j _start)
 # ──────────────────────────────────────────────
-IBEX_VECTOR_PC = "00100080"  # boot trampoline — skip this
+IBEX_VECTOR_MIN_PC = 0x10008a  # skip vector table (0x100080-0x100088), keep _start at 0x10008a
 
 def parse_ibex_trace(filepath: str) -> list:
     entries = []
@@ -97,7 +97,7 @@ def parse_ibex_trace(filepath: str) -> list:
             reginfo = parts[5].strip() if len(parts) > 5 else ""
 
             # Skip the vector trampoline
-            if pc == IBEX_VECTOR_PC:
+            if int(pc, 16) < IBEX_VECTOR_MIN_PC:
                 continue
 
             # Extract destination register write if present
