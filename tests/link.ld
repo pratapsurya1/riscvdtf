@@ -12,5 +12,6 @@ SECTIONS {
   .bss  : { *(.bss*) *(COMMON) } > RAM
   . = ALIGN(4);
   _end = .;
+  /* .scratch is intentionally omitted: Spike maps 0x100500 via -m flag at runtime */
 }
 

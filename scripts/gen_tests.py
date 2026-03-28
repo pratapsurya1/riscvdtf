@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 import random, os, argparse
 
-REGS = [f"x{i}" for i in range(1, 32)]
+REGS = [f"x{i}" for i in range(1, 30)]  # x30 reserved as scratch base pointer
+
+SCRATCH_REG  = "x30"
+SCRATCH_ADDR = 0x100500   # fixed absolute address, valid in both Spike and Ibex ELFs
+SCRATCH_SIZE = 64
 
 def rand_reg():
     return random.choice(REGS)
@@ -27,6 +31,28 @@ def gen_shift():
     op = random.choice(["slli","srli","srai"])
     return f"    {op} {rand_reg()}, {rand_reg()}, {random.randint(0,31)}"
 
+def gen_load_store():
+    """Generate a safe load or store using x30 as the scratch base (0x100500).
+    Offsets are kept within [0, SCRATCH_SIZE). lw/sw use word-aligned offsets.
+    x30 is never used as rd to avoid clobbering the base pointer."""
+    op = random.choice(["lw", "sw", "lb", "sb"])
+    if op == "lw":
+        rd     = rand_reg()
+        offset = random.randint(0, (SCRATCH_SIZE // 4) - 1) * 4  # 0,4,...,60
+        return f"    lw {rd}, {offset}({SCRATCH_REG})"
+    elif op == "sw":
+        rs     = rand_reg()
+        offset = random.randint(0, (SCRATCH_SIZE // 4) - 1) * 4
+        return f"    sw {rs}, {offset}({SCRATCH_REG})"
+    elif op == "lb":
+        rd     = rand_reg()
+        offset = random.randint(0, SCRATCH_SIZE - 1)
+        return f"    lb {rd}, {offset}({SCRATCH_REG})"
+    else:  # sb
+        rs     = rand_reg()
+        offset = random.randint(0, SCRATCH_SIZE - 1)
+        return f"    sb {rs}, {offset}({SCRATCH_REG})"
+
 def gen_program(n_insns, seed):
     random.seed(seed)
     lines = [
@@ -44,10 +70,14 @@ def gen_program(n_insns, seed):
         ".globl _start",
         "_start:",
     ]
+    # Initialise known register values
     for reg, val in zip(["x1","x2","x3","x4"], [-1, 0x7FFFFFFF, 1, -0x80000000]):
         lines.append(f"    li {reg}, {val}")
-    generators = [gen_r_type, gen_i_type, gen_shift, gen_m_type]
-    weights    = [0.35,        0.30,        0.15,       0.20]
+    # Initialise x30 with the fixed scratch base address (same encoding in both ELFs)
+    lines.append(f"    lui  {SCRATCH_REG}, 0x{SCRATCH_ADDR >> 12:x}")
+    lines.append(f"    addi {SCRATCH_REG}, {SCRATCH_REG}, 0x{SCRATCH_ADDR & 0xfff:x}")
+    generators = [gen_r_type, gen_i_type, gen_shift, gen_m_type, gen_load_store]
+    weights    = [0.30,        0.25,        0.13,       0.17,       0.15]
     for _ in range(n_insns):
         lines.append(random.choices(generators, weights=weights)[0]())
     lines += [
@@ -66,6 +96,11 @@ def gen_program(n_insns, seed):
         "tohost:   .word 0",
         ".globl fromhost",
         "fromhost: .word 0",
+        "# Scratch buffer for load/store at fixed address 0x100500",
+        ".section .scratch, \"aw\"",
+        ".align 4",
+        ".globl scratch_buf",
+        f"scratch_buf: .space {SCRATCH_SIZE}",
     ]
     return "\n".join(lines) + "\n"
 

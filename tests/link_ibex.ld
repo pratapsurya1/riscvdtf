@@ -18,4 +18,7 @@ SECTIONS {
   .data : { *(.data*) } > SRAM
   .bss  : { *(.bss*) *(COMMON) } > SRAM
   _end = .;
+
+  . = 0x00100500;
+  .scratch : { *(.scratch*) } > SRAM
 }

@@ -43,11 +43,13 @@ echo "Generated 100 DUT traces"
 echo ""
 
 echo "=== Step 4: Run Spike to generate reference traces ==="
+# -m maps Spike's main RAM + scratch region at 0x100500 for load/store tests
+SPIKE_MEM="-m0x80000000:0x100000,0x100000:0x1000"
 for i in $(seq 2000 2099); do
   spike_elf="tests/inputs/test_gen_${i}_spike.elf"
   spike_log="tests/outputs/test_gen_${i}_spike.log"
 
-  timeout 30 $SPIKE -l --isa=rv32imc_zicsr $spike_elf 2>&1 | \
+  timeout 30 $SPIKE -l --isa=rv32imc_zicsr $SPIKE_MEM $spike_elf 2>&1 | \
     python3 -c "
 import sys
 for line in sys.stdin:
